@@ -4,6 +4,7 @@ use std::io::Error;
 
 use serde_derive::{Deserialize, Serialize};
 
+pub const DEFAULT_CONFIG_PATH: &str = ".aktr.toml";
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AktrConfigEntryPoint {
