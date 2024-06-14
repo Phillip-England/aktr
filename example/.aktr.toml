@@ -1,0 +1,9 @@
+[entrypoint]
+root = "./index.ts"
+
+[output]
+dir = "./aktr/"
+lib = "./aktr/lib/"
+client = "./aktr/client/"
+server = "./aktr/server/"
+shared = "./aktr/shared/"

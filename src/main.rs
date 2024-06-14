@@ -1,5 +1,5 @@
 use colored::*;
-use std::env;
+use std::{env, path::PathBuf};
 
 mod config;
 mod logger;
@@ -14,14 +14,23 @@ fn main() {
 
     let args: Vec<String> = env::args().collect();
     let mut second_arg = "";
-    let mut _third_arg = "";
     if args.len() >= 2 { second_arg = &args[1]; }
-    if args.len() >= 3 { _third_arg = &args[2]; }
 
     if second_arg == "init" {
+
+		let mut third_arg = "";
+		if args.len() >= 3 { 
+			third_arg = &args[2]; 
+		}
+
+		if third_arg == "" {
+			third_arg = "./.aktr.toml";
+		}
+		let init_destination = format!("./{}/.aktr.toml", third_arg);
+
         AktrLogger::new().info("creating .aktr.toml");
         let config = AktrConfig::default()
-            .init_config_file();
+            .init_config_file(init_destination.to_string());
         if config.is_err() {
             let err = config.err().unwrap();
             AktrLogger::new().err(err.to_string());

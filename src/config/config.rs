@@ -73,21 +73,22 @@ impl AktrConfig {
         Ok(config.unwrap())
     }
 
-    pub fn init_config_file(&self) -> Result<(), Error> {
-        let file = File::open("./.aktr.toml");
-        if file.is_ok() {
-            return Err(Error::new(ErrorKind::AlreadyExists, ".aktr.toml already exists"));
-        }
-        let toml_string = toml::to_string(&self);
-        if toml_string.is_err() {
-            return Err(Error::new(ErrorKind::Other, "failed to serialize config to toml"));
-        }
-        let path = Path::new("./.aktr.toml");
-        let file = fs::write(path, toml_string.unwrap());
-        if file.is_err() {
-            return Err(Error::new(ErrorKind::Other, "failed to write .aktr.toml"));
-        }
-        Ok(())
+    pub fn init_config_file(&self, init_destination: String) -> Result<(), Error> {
+		if Path::new(&init_destination).exists() {
+			return Err(Error::new(ErrorKind::AlreadyExists, ".aktr.toml already exists"));
+		}
+		if let Some(parent) = Path::new(&init_destination).parent() {
+			fs::create_dir_all(parent)?;
+		}
+		let toml_string = toml::to_string(&self);
+		if toml_string.is_err() {
+			return Err(Error::new(ErrorKind::Other, "failed to serialize config to toml"));
+		}
+		let file = fs::write(init_destination, toml_string.unwrap());
+		if file.is_err() {
+			return Err(Error::new(ErrorKind::Other, "failed to write .aktr.toml"));
+		}
+		Ok(())
     }
 
 }
