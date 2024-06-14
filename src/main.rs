@@ -30,19 +30,6 @@ fn main() {
         AktrLogger::new().info(".aktr.toml created");
     }
 
-    if second_arg == "install" {
-        AktrLogger::new().info("installing aktr typescript files");
-        let config = AktrConfig::from_file();
-        if config.is_err() {
-            let err = config.err().unwrap();
-            AktrLogger::new().err(err.to_string());
-            return;
-        }
-        let config = config.unwrap();
-        let output_dir = config.output.dir;
-        AktrLogger::new().info(format!("output directory: {}", output_dir).as_str());
-    }
-
     if second_arg == "generate" {
         AktrLogger::new().info("generating aktr output files");
         let config = AktrConfig::from_file();
