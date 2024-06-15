@@ -1,11 +1,11 @@
-use colored::*;
-use std::{env, path::PathBuf};
 
 mod config;
 mod logger;
 mod command;
 
-use config::config::{AktrConfig, DEFAULT_CONFIG_PATH};
+use config::aktr_config::AktrConfig;
+use config::aktr_config::DEFAULT_AKTR_CONFIG_PATH;
+use config::package_json::PackageJson;
 use logger::logger::AktrLogger;
 use command::command::CommandCollector;
 
@@ -14,19 +14,19 @@ use command::command::CommandCollector;
 
 fn main() {
 
-	let args = CommandCollector::new();
+	let commands = CommandCollector::new();
 
-    if args.get(1) == "init" {
+    if commands.get(1) == "init" {
 		handle_init();
 		return;
     }
 
-    if args.get(1) == "generate" {
+    if commands.get(1) == "generate" {
 		handle_generate();
 		return;
     }
 
-	if args.get(1) == "" {
+	if commands.get(1) == "" {
 		println!("");
 		AktrLogger::title_line("aktr - a rust-powered typescript meta-framework");
 		AktrLogger::skip_line();
@@ -42,32 +42,42 @@ fn main() {
 
 
 fn handle_init() {
-	let args = CommandCollector::new();
-	let mut third_arg = args.get(2); 
-	if third_arg == "" {
-		third_arg = DEFAULT_CONFIG_PATH;
+    AktrLogger::skip_line();
+    AktrLogger::title_line("aktr - a rust-powered typescript meta-framework");
+	let commands = CommandCollector::new();
+	let mut third_command = commands.get(2); 
+	if third_command == "" {
+		third_command = DEFAULT_AKTR_CONFIG_PATH;
 	}
-	let init_destination = format!("./{}/{}", third_arg, DEFAULT_CONFIG_PATH);
-
-	AktrLogger::general("init", format!("creating {}", DEFAULT_CONFIG_PATH).as_str());
-	let config = AktrConfig::default()
-		.init_config_file(init_destination.to_string());
+	let aktr_config_dest = format!("./{}/{}", third_command, DEFAULT_AKTR_CONFIG_PATH);
+	AktrLogger::indented_line(format!("creating {}", DEFAULT_AKTR_CONFIG_PATH).as_str());
+	let default_config = AktrConfig::default();
+	let config = default_config.init_config_file(aktr_config_dest.to_string());
 	if config.is_err() {
 		let err = config.err().unwrap();
 		AktrLogger::err(err.to_string());
 		return;
 	}
-	AktrLogger::general("init", format!("{} created", DEFAULT_CONFIG_PATH).as_str());
-	if third_arg != DEFAULT_CONFIG_PATH {
-		AktrLogger::general("init", format!("run 'cd {}' then 'aktr generate' to build your application", third_arg).as_str());
+    let config = config.unwrap();
+	AktrLogger::indented_line(format!("{} created", DEFAULT_AKTR_CONFIG_PATH).as_str());
+	if third_command != DEFAULT_AKTR_CONFIG_PATH {
+		AktrLogger::indented_line(format!("run 'cd {}', then 'bun install' to install dependencies", third_command).as_str());
 	} else {
-		AktrLogger::general("init", "run 'aktr generate' to build your application");
-
+		AktrLogger::indented_line("run 'bun install' to install dependencies");
 	}
+    AktrLogger::indented_line("finally, run 'aktr generate' to generate typescript code from rust");
+    let package_json = PackageJson::default();
+    let package_json_write = package_json.write_to_file(format!("./{}/{}", third_command, config.src.package_json).as_str());
+    if package_json_write.is_err() {
+        let err = package_json_write.err().unwrap();
+        AktrLogger::err(err.to_string());
+        return;
+    } 
+    AktrLogger::skip_line();
 }
 
 fn handle_generate() {
-	let args = CommandCollector::new();
+	let commands = CommandCollector::new();
 	AktrLogger::info("generating aktr output files");
 	let config = AktrConfig::from_file();
 	if config.is_err() {
@@ -76,6 +86,6 @@ fn handle_generate() {
 		return;
 	}
 	let config = config.unwrap();
-	let output_dir = config.output.dir;
-	AktrLogger::info(format!("output directory: {}", output_dir).as_str());
+	let src_dir = config.src.dir;
+	AktrLogger::info(format!("src directory: {}", src_dir).as_str());
 }

@@ -1,9 +1,11 @@
 [entrypoint]
-root = "./index.ts"
+root = "./index.tsx"
 
-[output]
-dir = "./aktr/"
-lib = "./aktr/lib/"
-client = "./aktr/client/"
-server = "./aktr/server/"
-shared = "./aktr/shared/"
+[src]
+dir = "aktr/"
+lib = "aktr/lib/"
+client = "aktr/client/"
+server = "aktr/server/"
+shared = "aktr/shared/"
+package_json = "package.json"
+config = ".aktr.toml"

@@ -1,10 +1,10 @@
-use std::fs::{self, File};
+use std::fs;
 use std::{io::ErrorKind, path::Path};
 use std::io::Error;
 
 use serde_derive::{Deserialize, Serialize};
 
-pub const DEFAULT_CONFIG_PATH: &str = ".aktr.toml";
+pub const DEFAULT_AKTR_CONFIG_PATH: &str = ".aktr.toml";
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AktrConfigEntryPoint {
@@ -15,30 +15,34 @@ impl AktrConfigEntryPoint {
 
     pub fn default() -> Self {
         AktrConfigEntryPoint {
-            root: String::from("./index.ts")
+            root: String::from("./index.tsx")
         }
     }
 
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct AktrConfigOutput {
+pub struct AktrConfigSrc {
     pub dir: String,
     pub lib: String,
     pub client: String,
     pub server: String,
     pub shared: String,
+    pub package_json: String,
+    pub config: String,
 }
 
-impl AktrConfigOutput {
+impl AktrConfigSrc {
 
     pub fn default() -> Self {
-        AktrConfigOutput {
-            dir: String::from("./aktr/"),
-            lib: String::from("./aktr/lib/"),
-            client: String::from("./aktr/client/"),
-            server: String::from("./aktr/server/"),
-            shared: String::from("./aktr/shared/"),
+        AktrConfigSrc {
+            dir: String::from("aktr/"),
+            lib: String::from("aktr/lib/"),
+            client: String::from("aktr/client/"),
+            server: String::from("aktr/server/"),
+            shared: String::from("aktr/shared/"),
+            package_json: String::from("package.json"),
+            config: String::from(".aktr.toml"),
         }
     }
 
@@ -49,7 +53,7 @@ impl AktrConfigOutput {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AktrConfig {
     pub entrypoint: AktrConfigEntryPoint,
-    pub output: AktrConfigOutput
+    pub src: AktrConfigSrc
 }
 
 impl AktrConfig {
@@ -57,7 +61,7 @@ impl AktrConfig {
     pub fn default() -> Self {
         AktrConfig {
             entrypoint: AktrConfigEntryPoint::default(),
-            output: AktrConfigOutput::default(),
+            src: AktrConfigSrc::default(),
         }
     }
 
@@ -74,7 +78,7 @@ impl AktrConfig {
         Ok(config.unwrap())
     }
 
-    pub fn init_config_file(&self, init_destination: String) -> Result<(), Error> {
+    pub fn init_config_file(&self, init_destination: String) -> Result<&Self, Error> {
 		if Path::new(&init_destination).exists() {
 			return Err(Error::new(ErrorKind::AlreadyExists, ".aktr.toml already exists"));
 		}
@@ -89,7 +93,7 @@ impl AktrConfig {
 		if file.is_err() {
 			return Err(Error::new(ErrorKind::Other, "failed to write .aktr.toml"));
 		}
-		Ok(())
+		Ok(self)
     }
 
 }

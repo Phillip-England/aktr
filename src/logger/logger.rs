@@ -30,7 +30,7 @@ impl AktrLogger {
 	}
 
 	pub fn indented_line(message: &str) {
-		println!("{}", format!("  {}", message));
+		println!("{}", format!("{} {}", "-", message));
 	}
 
 	pub fn skip_line() {
